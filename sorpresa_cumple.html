@@ -1,0 +1,565 @@
+<title>Una sorpresa para ti</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap">
+<style>
+/* Diseño: una columna centrada. Cada paso ocupa la pantalla; el corazón se dibuja
+   en un lienzo a pantalla completa y el mensaje aparece debajo, en HTML. */
+:root {
+  color-scheme: dark;
+  --bg: #1a0a14;
+  --campo: #2b1422;
+  --campo-alt: #4a2238;
+  --texto: #ffffff;
+  --suave: #ffc2d4;
+  --acento: #e0245e;
+  --acento-hover: #ff4d82;
+  --error: #ff9a9a;
+  --font-display: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--texto);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.5;
+  padding-block: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { min-height: 100%; display: flex; flex-direction: column; }
+:focus-visible { outline: 3px solid var(--suave); outline-offset: 3px; }
+
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  width: 100%;
+  max-width: 30rem;
+  margin: 0 auto;
+  padding-block: 1.5rem;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+h1, h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+h1 { font-size: clamp(2.2rem, 9vw, 3rem); }
+h2 { font-size: clamp(1.7rem, 7vw, 2.3rem); }
+.paso {
+  margin: 0;
+  font-size: .85rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--suave);
+}
+.sub { margin: 0; max-width: 26rem; color: var(--suave); }
+.sr {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+.btn {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: var(--texto);
+  background: var(--acento);
+  border: 0;
+  border-radius: 999px;
+  padding: .85rem 2.2rem;
+  min-width: 11rem;
+  cursor: pointer;
+  transition: background .15s, transform .15s;
+}
+.btn:hover { background: var(--acento-hover); }
+.btn:active { transform: scale(.97); }
+.btn-grande { font-size: 1.4rem; padding: 1rem 2.6rem; }
+
+.formulario { display: flex; flex-direction: column; align-items: center; gap: 1rem; width: 100%; }
+.fila { display: flex; flex-wrap: wrap; justify-content: center; gap: .8rem; }
+.campo {
+  font: inherit;
+  font-size: 1.2rem;
+  text-align: center;
+  color: var(--texto);
+  background: var(--campo);
+  border: 2px solid transparent;
+  border-radius: 14px;
+  padding: .7rem 1rem;
+}
+input.campo { width: 100%; max-width: 20rem; box-sizing: border-box; }
+select.campo { min-width: 7rem; }
+.campo:focus { border-color: var(--acento-hover); outline: 0; }
+option { background: var(--campo); color: var(--texto); }
+.error { margin: 0; min-height: 1.5em; color: var(--error); font-size: .95rem; }
+
+.colores {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  justify-content: center;
+  gap: 1.1rem 1rem;
+}
+@media (min-width: 520px) { .colores { grid-template-columns: repeat(6, auto); } }
+.color {
+  display: flex; flex-direction: column; align-items: center; gap: .5rem;
+  background: none; border: 0; padding: 0; cursor: pointer;
+  font: inherit; font-size: .85rem; color: var(--texto);
+}
+.muestra {
+  width: 3.6rem; height: 3.6rem; border-radius: 50%;
+  background: var(--c);
+  transition: transform .15s, box-shadow .15s;
+}
+.color:hover .muestra, .color:focus-visible .muestra { transform: scale(1.1); box-shadow: 0 0 0 4px var(--suave); }
+
+.cartas { display: flex; flex-wrap: wrap; gap: .6rem; justify-content: center; }
+.carta {
+  width: clamp(4rem, 19vw, 5.6rem); height: 7.5rem;
+  font-family: var(--font-display); font-size: 2.6rem; font-weight: 700;
+  color: var(--suave);
+  background: var(--campo);
+  border: 2px solid var(--campo-alt);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: transform .2s, background .2s, opacity .3s, border-color .2s;
+}
+.carta:hover { background: var(--campo-alt); transform: translateY(-4px); }
+.carta.elegida { transform: translateY(-8px) scale(1.06); border-color: var(--suave); }
+.cartas.hecho .carta:not(.elegida) { opacity: .25; }
+
+.latido-mini {
+  font-size: 3rem; line-height: 1; color: var(--acento);
+  animation: latido 1.6s ease-in-out infinite;
+}
+@keyframes latido {
+  0%, 100% { transform: scale(1); }
+  14% { transform: scale(1.18); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.12); }
+}
+
+#lienzo { position: fixed; left: 0; top: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+#hueco { width: 100%; height: clamp(220px, 42vh, 360px); flex: none; }
+.mensaje { display: flex; flex-direction: column; align-items: center; gap: .9rem; }
+.mensaje h2 { font-size: clamp(1.8rem, 8vw, 2.5rem); }
+.deseo { margin: 0; font-style: italic; color: var(--suave); max-width: 24rem; }
+.dato { margin: 0; }
+.firma { margin: 0; font-style: italic; color: var(--suave); }
+.enlace {
+  font: inherit; font-size: .9rem; color: var(--suave);
+  background: none; border: 0; padding: .4rem .6rem; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.revela {
+  opacity: 0; transform: translateY(10px); visibility: hidden;
+  transition: opacity .6s, transform .6s, visibility 0s .6s;
+}
+.revela.in { opacity: 1; transform: none; visibility: visible; transition-delay: 0s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .latido-mini { animation: none; }
+  .revela, .revela.in { opacity: 1; transform: none; visibility: visible; transition: none; }
+  .btn, .carta, .muestra { transition: none; }
+}
+</style>
+
+<canvas id="lienzo" hidden aria-hidden="true"></canvas>
+<main>
+  <section class="screen" id="p-bienvenida">
+    <span class="latido-mini" aria-hidden="true">&#9829;</span>
+    <h1>Hola</h1>
+    <p class="sub" id="t-bienvenida"></p>
+    <button class="btn btn-grande" id="b-comenzar" data-foco type="button">Comenzar</button>
+  </section>
+
+  <section class="screen" id="p-nombre" hidden>
+    <p class="paso">Paso 1 de 4</p>
+    <h2>¿Cómo te llamas?</h2>
+    <form class="formulario" id="f-nombre" novalidate>
+      <label class="sr" for="in-nombre">Tu nombre</label>
+      <input class="campo" id="in-nombre" data-foco type="text" maxlength="30" autocomplete="given-name" placeholder="Escribe tu nombre">
+      <p class="error" id="err-nombre" role="alert"></p>
+      <button class="btn" type="submit">Siguiente</button>
+    </form>
+  </section>
+
+  <section class="screen" id="p-fecha" hidden>
+    <p class="paso">Paso 2 de 4</p>
+    <h2>¿Cuándo es tu cumpleaños?</h2>
+    <form class="formulario" id="f-fecha" novalidate>
+      <div class="fila">
+        <label class="sr" for="sel-dia">Día</label>
+        <select class="campo" id="sel-dia" data-foco></select>
+        <label class="sr" for="sel-mes">Mes</label>
+        <select class="campo" id="sel-mes"></select>
+      </div>
+      <p class="error" id="err-fecha" role="alert"></p>
+      <button class="btn" type="submit">Siguiente</button>
+    </form>
+  </section>
+
+  <section class="screen" id="p-color" hidden>
+    <p class="paso">Paso 3 de 4</p>
+    <h2>¿Cuál es tu color favorito?</h2>
+    <div class="colores" id="lista-colores"></div>
+  </section>
+
+  <section class="screen" id="p-tarjeta" hidden>
+    <p class="paso">Paso 4 de 4</p>
+    <h2>Elige una tarjeta</h2>
+    <p class="sub">Cada una esconde un mensaje para ti.</p>
+    <div class="cartas" id="lista-cartas"></div>
+  </section>
+
+  <section class="screen" id="p-final" hidden>
+    <h2 id="t-final"></h2>
+    <p class="sub">Tu sorpresa ya está preparada.</p>
+    <button class="btn btn-grande" id="b-corazon" data-foco type="button">Haz clic aquí</button>
+  </section>
+
+  <section class="screen" id="p-corazon" hidden>
+    <div id="hueco" aria-hidden="true"></div>
+    <div class="mensaje">
+      <h2 class="revela" id="t-feliz"></h2>
+      <p class="deseo revela" id="t-deseo"></p>
+      <p class="dato revela" id="t-dias"></p>
+      <p class="firma revela" id="t-firma"></p>
+      <button class="enlace revela" id="b-reiniciar" type="button">Volver a empezar</button>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ===== Personaliza aquí ===== */
+  var BIENVENIDA = "Tengo una sorpresa para ti. Solo tienes que contestar unas cositas.";
+  var DESEOS = [ /* los mensajes que se esconden detrás de las tarjetas */
+    "Siempre estaré para lo que necesites",
+    "Eres lo mejor que me ha pasado en la vida",
+    "Contigo todo se siente más bonito",
+    "Te elegiría una y mil veces"
+  ];
+  var FIRMA = "Te amo";
+  /* ============================ */
+
+  var MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
+               "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+  var DIAS_MES = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  var COLORES = [
+    { nombre: "Rojo", hex: "#e0245e" },
+    { nombre: "Rosa", hex: "#ff6fa5" },
+    { nombre: "Fucsia", hex: "#e91e8c" },
+    { nombre: "Morado", hex: "#9b5de5" },
+    { nombre: "Lila", hex: "#b794f6" },
+    { nombre: "Azul", hex: "#3a86ff" },
+    { nombre: "Celeste", hex: "#4cc9f0" },
+    { nombre: "Turquesa", hex: "#1fc8b0" },
+    { nombre: "Verde", hex: "#3ddc84" },
+    { nombre: "Amarillo", hex: "#ffd23f" },
+    { nombre: "Naranja", hex: "#ff8a3d" },
+    { nombre: "Blanco", hex: "#f5f0ff" }
+  ];
+  var SUAVE = "#ffc2d4";
+  var PANTALLAS = ["bienvenida", "nombre", "fecha", "color", "tarjeta", "final", "corazon"];
+
+  var token = 0;
+  var redimensionar = null;
+  var reducido = false;
+  try { reducido = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+
+  function nuevosDatos() {
+    return { nombre: "", dia: 1, mes: 1, color: COLORES[0].hex, deseo: DESEOS[0] };
+  }
+  var datos = nuevosDatos();
+
+  function $(id) { return document.getElementById(id); }
+  function capitalizar(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
+  function mezclar(a) {
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function ir(id) {
+    token++;
+    redimensionar = null;
+    PANTALLAS.forEach(function (p) { $("p-" + p).hidden = (p !== id); });
+    $("lienzo").hidden = (id !== "corazon");
+    var f = document.querySelector("#p-" + id + " [data-foco]");
+    if (f && f.focus) f.focus();
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- fecha ---------- */
+  function diasParaCumple(dia, mes) {
+    var hoy = new Date();
+    var inicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+    function fecha(anio) {
+      var f = new Date(anio, mes - 1, dia);
+      if (f.getMonth() !== mes - 1) f = new Date(anio, 2, 1); /* 29 de febrero en año no bisiesto */
+      return f;
+    }
+    var prox = fecha(inicio.getFullYear());
+    if (prox < inicio) prox = fecha(inicio.getFullYear() + 1);
+    return Math.round((prox - inicio) / 86400000);
+  }
+  function fraseDias(n) {
+    if (n === 0) return "¡Hoy es tu día!";
+    if (n === 1) return "Falta 1 día para tu cumpleaños";
+    return "Faltan " + n + " días para tu cumpleaños";
+  }
+
+  /* ---------- pasos ---------- */
+  $("t-bienvenida").textContent = BIENVENIDA;
+  $("b-comenzar").addEventListener("click", function () { ir("nombre"); });
+
+  $("f-nombre").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var n = $("in-nombre").value.replace(/\s+/g, " ").trim();
+    if (!n) { $("err-nombre").textContent = "Escribe tu nombre para continuar"; return; }
+    $("err-nombre").textContent = "";
+    datos.nombre = n;
+    ir("fecha");
+  });
+
+  function opcion(valor, texto) {
+    var o = document.createElement("option");
+    o.value = valor;
+    o.textContent = texto;
+    return o;
+  }
+  var selDia = $("sel-dia"), selMes = $("sel-mes");
+  selDia.appendChild(opcion("", "Día"));
+  for (var d = 1; d <= 31; d++) selDia.appendChild(opcion(String(d), String(d)));
+  selMes.appendChild(opcion("", "Mes"));
+  MESES.forEach(function (m, i) { selMes.appendChild(opcion(String(i + 1), capitalizar(m))); });
+
+  $("f-fecha").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var dia = parseInt(selDia.value, 10), mes = parseInt(selMes.value, 10);
+    var err = $("err-fecha");
+    if (!dia || !mes) { err.textContent = "Elige el día y el mes"; return; }
+    if (dia > DIAS_MES[mes - 1]) {
+      err.textContent = capitalizar(MESES[mes - 1]) + " no tiene " + dia + " días";
+      return;
+    }
+    err.textContent = "";
+    datos.dia = dia;
+    datos.mes = mes;
+    ir("color");
+  });
+
+  COLORES.forEach(function (c) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "color";
+    b.style.setProperty("--c", c.hex);
+    var muestra = document.createElement("span");
+    muestra.className = "muestra";
+    var rotulo = document.createElement("span");
+    rotulo.textContent = c.nombre;
+    b.appendChild(muestra);
+    b.appendChild(rotulo);
+    b.addEventListener("click", function () {
+      datos.color = c.hex;
+      armarCartas();
+      ir("tarjeta");
+    });
+    $("lista-colores").appendChild(b);
+  });
+
+  function armarCartas() {
+    var cont = $("lista-cartas");
+    cont.textContent = "";
+    cont.classList.remove("hecho");
+    var orden = mezclar(DESEOS.map(function (_, i) { return i; }));
+    orden.forEach(function (idx, pos) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "carta";
+      b.textContent = "?";
+      b.setAttribute("aria-label", "Tarjeta " + (pos + 1));
+      b.addEventListener("click", function () {
+        if (cont.classList.contains("hecho")) return;
+        b.classList.add("elegida");
+        cont.classList.add("hecho");
+        datos.deseo = DESEOS[idx];
+        setTimeout(function () {
+          $("t-final").textContent = "Todo listo, " + datos.nombre;
+          ir("final");
+        }, reducido ? 0 : 500);
+      });
+      cont.appendChild(b);
+    });
+  }
+
+  $("b-corazon").addEventListener("click", mostrarCorazon);
+
+  $("b-reiniciar").addEventListener("click", function () {
+    datos = nuevosDatos();
+    $("in-nombre").value = "";
+    selDia.value = "";
+    selMes.value = "";
+    $("err-nombre").textContent = "";
+    $("err-fecha").textContent = "";
+    ir("bienvenida");
+  });
+
+  window.addEventListener("resize", function () { if (redimensionar) redimensionar(); });
+
+  /* ---------- el corazón ---------- */
+  var N = 240, PUNTOS = [];
+  var minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
+  for (var k = 0; k <= N; k++) {
+    var t = 2 * Math.PI * k / N;
+    var x = 16 * Math.pow(Math.sin(t), 3);
+    var y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+    PUNTOS.push([x, y]);
+    if (x < minX) minX = x; if (x > maxX) maxX = x;
+    if (y < minY) minY = y; if (y > maxY) maxY = y;
+  }
+  var MX = (minX + maxX) / 2, MY = (minY + maxY) / 2, AN = maxX - minX, AL = maxY - minY;
+
+  function aclarar(hex, a) {
+    var n = parseInt(hex.slice(1), 16);
+    var r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    r = Math.round(r + (255 - r) * a);
+    g = Math.round(g + (255 - g) * a);
+    b = Math.round(b + (255 - b) * a);
+    return "rgb(" + r + "," + g + "," + b + ")";
+  }
+
+  function mostrarTextos(mi) {
+    var h = $("t-feliz");
+    h.textContent = "";
+    h.appendChild(document.createTextNode("¡Feliz cumpleaños,"));
+    h.appendChild(document.createElement("br"));
+    h.appendChild(document.createTextNode(datos.nombre + "!"));
+    $("t-deseo").textContent = datos.deseo;
+    $("t-dias").textContent = fraseDias(diasParaCumple(datos.dia, datos.mes));
+    $("t-firma").textContent = FIRMA;
+    ["t-feliz", "t-deseo", "t-dias", "t-firma", "b-reiniciar"].forEach(function (id, i) {
+      var el = $(id);
+      if (reducido) { el.classList.add("in"); return; }
+      setTimeout(function () { if (mi === token) el.classList.add("in"); }, 150 + i * 600);
+    });
+  }
+
+  function mostrarCorazon() {
+    ir("corazon");
+    var mi = token;
+    ["t-feliz", "t-deseo", "t-dias", "t-firma", "b-reiniciar"].forEach(function (id) {
+      $(id).classList.remove("in");
+    });
+
+    var cv = $("lienzo"), ctx = cv.getContext("2d");
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var W = 0, H = 0;
+    function medir() {
+      W = window.innerWidth;
+      H = window.innerHeight;
+      cv.width = Math.round(W * dpr);
+      cv.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    medir();
+    redimensionar = medir;
+
+    var color = datos.color;
+    var avance = 0, fase = reducido ? "latido" : "trazo", t0 = 0, parts = [];
+    if (reducido) mostrarTextos(mi);
+
+    function camino(cx, cy, s, esc, hasta) {
+      ctx.beginPath();
+      for (var j = 0; j <= hasta; j++) {
+        var X = cx + (PUNTOS[j][0] - MX) * s * esc;
+        var Y = cy + (PUNTOS[j][1] - MY) * s * esc;
+        if (j === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+      }
+    }
+    function contorno() {
+      ctx.lineWidth = 3;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.strokeStyle = SUAVE;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 14;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+    function particulas() {
+      if (parts.length < 28 && Math.random() < 0.1) {
+        parts.push({
+          x: 20 + Math.random() * (W - 40), y: H + 20,
+          v: 0.8 + Math.random(), tam: 12 + Math.random() * 12,
+          ph: Math.random() * 6.28,
+          tono: [color, SUAVE, "#ffffff"][Math.floor(Math.random() * 3)]
+        });
+      }
+      ctx.save();
+      ctx.globalAlpha = 0.5;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      parts = parts.filter(function (p) {
+        p.y -= p.v;
+        p.x += Math.sin(p.ph + p.y / 45) * 0.35;
+        if (p.y < -30) return false;
+        ctx.font = p.tam + "px sans-serif";
+        ctx.fillStyle = p.tono;
+        ctx.fillText("♥", p.x, p.y);
+        return true;
+      });
+      ctx.restore();
+    }
+
+    function frame(now) {
+      if (mi !== token) return;
+      var r = $("hueco").getBoundingClientRect();
+      var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      var s = Math.min(r.width / AN, r.height / AL) * 0.92;
+      ctx.clearRect(0, 0, W, H);
+      if (!reducido) particulas();
+      if (fase === "trazo") {
+        avance = Math.min(N, avance + 4);
+        camino(cx, cy, s, 1, avance);
+        contorno();
+        if (avance >= N) { fase = "latido"; t0 = now; mostrarTextos(mi); }
+      } else {
+        var f = (now - t0) / 1000 * 6;
+        var esc = reducido ? 1 : 1 + 0.05 * Math.sin(f) + 0.025 * Math.sin(2 * f);
+        camino(cx, cy, s, esc, N);
+        ctx.closePath();
+        var g = ctx.createRadialGradient(cx - AN * s * esc * 0.18, cy - AL * s * esc * 0.2, s * 2,
+                                         cx, cy, AN * s * esc * 0.7);
+        g.addColorStop(0, aclarar(color, 0.35));
+        g.addColorStop(1, color);
+        ctx.fillStyle = g;
+        ctx.fill();
+        contorno();
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  ir("bienvenida");
+})();
+</script>
